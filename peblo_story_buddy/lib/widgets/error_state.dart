@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_text_styles.dart';
+
+class ErrorOverlay extends StatelessWidget {
+  final VoidCallback? onRetry;
+
+  const ErrorOverlay({super.key, this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black.withAlpha(60),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryPurple.withAlpha(40),
+                blurRadius: 40,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.pinkSection.withAlpha(30),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.wifi_off_rounded,
+                    color: AppColors.pinkSection,
+                    size: 40,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Oops!',
+                style: AppTextStyles.headingLarge.copyWith(
+                  color: AppColors.darkNavy,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Let's try that again.",
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.textMedium,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: Material(
+                  borderRadius: BorderRadius.circular(25),
+                  color: AppColors.primaryPurple,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(25),
+                    onTap: onRetry,
+                    child: Center(
+                      child: Text(
+                        'Try Again',
+                        style: AppTextStyles.buttonText.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
