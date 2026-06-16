@@ -1,0 +1,130 @@
+{
+  "stories": [
+    {
+      "id": "the-lost-gear",
+      "title": "The Lost Gear",
+      "sentences": [
+        "Once upon a time, a clever little robot named Pip lost his shiny blue gear in the Whispering Woods.",
+        "Pip searched under giant mushroom houses and behind sparkling waterfalls, but the gear was nowhere to be found.",
+        "Suddenly, a friendly firefly named Flicker offered to help. \"I saw something shiny near the Crystal Cave!\" she buzzed.",
+        "Together, they ventured deep into the glowing cave, where the walls sparkled like a thousand stars.",
+        "At the heart of the cave, Pip found his gear resting on a bed of luminous crystals. His adventure had just begun!"
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "What colour was Pip the Robot's lost gear?",
+            "options": [
+              { "text": "Blue", "isCorrect": true },
+              { "text": "Red", "isCorrect": false },
+              { "text": "Green", "isCorrect": false },
+              { "text": "Yellow", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "Who offered to help Pip search?",
+            "options": [
+              { "text": "A wise owl", "isCorrect": false },
+              { "text": "A friendly firefly", "isCorrect": true },
+              { "text": "A fluffy rabbit", "isCorrect": false },
+              { "text": "A little girl", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "Where did Pip find his gear?",
+            "options": [
+              { "text": "Under a mushroom", "isCorrect": false },
+              { "text": "Behind a waterfall", "isCorrect": false },
+              { "text": "Inside the Crystal Cave", "isCorrect": true },
+              { "text": "In the Whispering Woods", "isCorrect": false }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-garden-mystery",
+      "title": "The Garden Mystery",
+      "sentences": [
+        "In a cozy little garden, a friendly snail named Shelly discovered that her favourite daisy had lost all its petals overnight.",
+        "Shelly asked the wise old owl perched on the oak tree, \"Who could have done this?\"",
+        "The owl pointed his wing towards a trail of tiny paw prints leading to the strawberry patch.",
+        "There, Shelly found a fluffy rabbit named Ruby, who had used the petals to decorate her birthday cake.",
+        "Ruby apologized and invited Shelly to the party, where they shared strawberry lemonade and danced under the moonlight."
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "What did Shelly discover was missing from her daisy?",
+            "options": [
+              { "text": "The stem", "isCorrect": false },
+              { "text": "The petals", "isCorrect": true },
+              { "text": "The leaves", "isCorrect": false },
+              { "text": "The roots", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "Who did Shelly ask for help?",
+            "options": [
+              { "text": "A firefly", "isCorrect": false },
+              { "text": "A wise old owl", "isCorrect": true },
+              { "text": "A little girl", "isCorrect": false },
+              { "text": "A robot", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "What had Ruby used the petals for?",
+            "options": [
+              { "text": "A flower crown", "isCorrect": false },
+              { "text": "A birthday cake decoration", "isCorrect": true },
+              { "text": "A painting", "isCorrect": false },
+              { "text": "A gift for her mother", "isCorrect": false }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-star-wisher",
+      "title": "The Star Wisher",
+      "sentences": [
+        "Every night, a little girl named Luna gazed out her window and wished upon the brightest star in the sky.",
+        "One evening, the star blinked back at her and floated down, landing softly in her backyard.",
+        "The star, named Sparkle, had lost its glow and needed a happy memory to shine again.",
+        "Luna shared her happiest memory — the day she learned to ride her bicycle — and Sparkle absorbed the joy.",
+        "With its glow restored, Sparkle soared back into the sky, shining brighter than ever, and winked at Luna every night."
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "What did Sparkle need to regain its glow?",
+            "options": [
+              { "text": "Moonlight", "isCorrect": false },
+              { "text": "A happy memory", "isCorrect": true },
+              { "text": "A friend", "isCorrect": false },
+              { "text": "Warmth from the sun", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "What was the name of the little girl?",
+            "options": [
+              { "text": "Shelly", "isCorrect": false },
+              { "text": "Ruby", "isCorrect": false },
+              { "text": "Luna", "isCorrect": true },
+              { "text": "Pip", "isCorrect": false }
+            ]
+          },
+          {
+            "question": "What did Luna share with Sparkle?",
+            "options": [
+              { "text": "A toy", "isCorrect": false },
+              { "text": "Her happiest memory", "isCorrect": true },
+              { "text": "A book", "isCorrect": false },
+              { "text": "A star from her window", "isCorrect": false }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
