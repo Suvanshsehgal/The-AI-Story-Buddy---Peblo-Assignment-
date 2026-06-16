@@ -40,6 +40,7 @@ dependencies:
   flutter_animate: ^4.5.2
   google_fonts: ^8.1.0
   flutter_svg: ^2.3.0
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -64,9 +65,10 @@ flutter:
   uses-material-design: true
 
   assets:
-    - lib/assets/peblo1.gif
     - lib/assets/peblo2.gif
-    - lib/assets/hiii.gif
+    - lib/assets/wrong.mp3
+    - lib/assets/victory.mp3
+    - assets/json/stories.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
