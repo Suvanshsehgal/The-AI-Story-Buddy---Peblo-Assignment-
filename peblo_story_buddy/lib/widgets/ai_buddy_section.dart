@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
 import '../core/theme/app_colors.dart';
 
 enum BuddyState { idle, thinking, reading, celebrating, sad }
@@ -27,7 +28,7 @@ class _AiBuddySectionState extends State<AiBuddySection>
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: AppConstants.animFloat,
     )..repeat(reverse: true);
     _floatAnimation = Tween<double>(begin: -4, end: 4).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOutSine),
@@ -47,9 +48,10 @@ class _AiBuddySectionState extends State<AiBuddySection>
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, _floatAnimation.value),
-          child: _buildContent(),
+          child: child,
         );
       },
+      child: _buildContent(),
     );
   }
 
@@ -82,6 +84,9 @@ class _AiBuddySectionState extends State<AiBuddySection>
             height: widget.size,
             fit: BoxFit.contain,
             gaplessPlayback: true,
+            cacheWidth: AppConstants.gifDecodeWidth,
+            cacheHeight: AppConstants.gifDecodeHeight,
+            filterQuality: FilterQuality.low,
           ),
           if (widget.buddyState == BuddyState.thinking)
             Positioned(

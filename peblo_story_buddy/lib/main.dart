@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_colors.dart';
 import 'screens/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const PebloApp());
+  runApp(const ProviderScope(child: PebloApp()));
 }
 
-class PebloApp extends StatefulWidget {
+class PebloApp extends ConsumerStatefulWidget {
   const PebloApp({super.key});
 
   @override
-  State<PebloApp> createState() => _PebloAppState();
+  ConsumerState<PebloApp> createState() => _PebloAppState();
 }
 
-class _PebloAppState extends State<PebloApp> {
+class _PebloAppState extends ConsumerState<PebloApp> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      precacheImage(const AssetImage('lib/assets/peblo2.gif'), context);
+      precacheImage(
+        const AssetImage('lib/assets/peblo2.gif'),
+        context,
+        onError: (_, _) {},
+      );
     });
   }
 

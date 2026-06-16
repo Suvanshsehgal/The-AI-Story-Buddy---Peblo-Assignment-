@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
 import '../core/theme/app_colors.dart';
 
 enum TailDirection { left, right, down, none }
@@ -21,14 +22,14 @@ class _CalloutBubbleState extends State<CalloutBubble>
   int _charIndex = 0;
   Timer? _typeTimer;
 
-  final String _fullText = "Hi explorer! Ready for today's\nmagical story?";
+  static const String _fullText = "Hi explorer! Ready for today's\nmagical story?";
 
   @override
   void initState() {
     super.initState();
     _appearController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: AppConstants.animSlow,
     )..forward();
     _fadeSlide = CurvedAnimation(
       parent: _appearController,
@@ -40,7 +41,7 @@ class _CalloutBubbleState extends State<CalloutBubble>
   void _startTyping() {
     _charIndex = 0;
     _typedText = '';
-    _typeTimer = Timer.periodic(const Duration(milliseconds: 35), (timer) {
+    _typeTimer = Timer.periodic(AppConstants.typewriterInterval, (timer) {
       if (!mounted) {
         timer.cancel();
         return;
@@ -52,7 +53,7 @@ class _CalloutBubbleState extends State<CalloutBubble>
         });
       } else {
         timer.cancel();
-        Future.delayed(const Duration(seconds: 5), () {
+        Future.delayed(AppConstants.typewriterRestart, () {
           if (mounted) _startTyping();
         });
       }
@@ -71,16 +72,24 @@ class _CalloutBubbleState extends State<CalloutBubble>
     final screenWidth = MediaQuery.of(context).size.width;
     final maxBubbleWidth = screenWidth * 0.55;
 
-    return FadeTransition(
-      opacity: _fadeSlide,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, -0.1),
-          end: Offset.zero,
-        ).animate(_fadeSlide),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxBubbleWidth.clamp(160, 260)),
-          child: _buildContent(),
+    return Semantics(
+      label: _fullText,
+      child: FadeTransition(
+        opacity: _fadeSlide,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -0.1),
+            end: Offset.zero,
+          ).animate(_fadeSlide),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: maxBubbleWidth.clamp(
+                AppConstants.calloutBubbleMinWidth,
+                AppConstants.calloutBubbleMaxWidth,
+              ),
+            ),
+            child: _buildContent(),
+          ),
         ),
       ),
     );
@@ -94,7 +103,7 @@ class _CalloutBubbleState extends State<CalloutBubble>
         children: [
           ClipPath(
             clipper: _LeftTriangle(),
-            child: Container(width: 10, height: 18, color: Colors.white),
+            child: Container(width: AppConstants.calloutTailSize, height: 18, color: Colors.white),
           ),
           Flexible(child: _bubble()),
         ],
@@ -109,7 +118,7 @@ class _CalloutBubbleState extends State<CalloutBubble>
           Flexible(child: _bubble()),
           ClipPath(
             clipper: _RightTriangle(),
-            child: Container(width: 10, height: 18, color: Colors.white),
+            child: Container(width: AppConstants.calloutTailSize, height: 18, color: Colors.white),
           ),
         ],
       );
@@ -155,13 +164,16 @@ class _CalloutBubbleState extends State<CalloutBubble>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '\u{1F44B} Heyaa!',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Nunito',
-              color: AppColors.primaryPurple,
+          Semantics(
+            label: 'Wave emoji',
+            child: Text(
+              '\u{1F44B} Heyaa!',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                fontFamily: 'Nunito',
+                color: AppColors.primaryPurple,
+              ),
             ),
           ),
           const SizedBox(height: 4),

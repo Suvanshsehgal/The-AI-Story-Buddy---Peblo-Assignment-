@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/constants.dart';
 import '../widgets/top_section.dart';
 import '../widgets/story_card.dart';
 import '../widgets/audio_player.dart';
@@ -10,193 +12,228 @@ import '../widgets/quiz_section.dart';
 import '../widgets/celebration_overlay.dart';
 import '../widgets/wrong_answer_overlay.dart';
 import '../core/theme/app_colors.dart';
-import '../widgets/ai_buddy_section.dart';
+import '../providers/story_provider.dart';
+import '../providers/story_state_provider.dart';
+import '../providers/quiz_provider.dart';
+import '../providers/buddy_provider.dart';
 
-enum ScreenState { idle, loading, playing, quiz, correct, wrong, error }
-
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  ScreenState _currentState = ScreenState.idle;
-  BuddyState _buddyState = BuddyState.idle;
-  int _currentSentenceIndex = 0;
-  double _audioProgress = 0.0;
-  bool _isPlaying = false;
-  Timer? _narrationTimer;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Timer? _clockTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _clockTimer = Timer.periodic(AppConstants.clockTick, (_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
-    _narrationTimer?.cancel();
+    _clockTimer?.cancel();
     super.dispose();
   }
 
-  void _onReadStory() {
-    setState(() {
-      _currentState = ScreenState.loading;
-      _buddyState = BuddyState.thinking;
-    });
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() {
-        _currentState = ScreenState.playing;
-        _buddyState = BuddyState.reading;
-        _isPlaying = true;
-      });
-      _startNarration();
-    });
+  String _formatTime(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 
-  void _startNarration() {
-    _currentSentenceIndex = 0;
-    _narrationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        _currentSentenceIndex++;
-        _audioProgress = _currentSentenceIndex / StoryCard.storySentences.length;
-
-        if (_currentSentenceIndex >= StoryCard.storySentences.length) {
-          timer.cancel();
-          _isPlaying = false;
-          _buddyState = BuddyState.idle;
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (!mounted) return;
-            setState(() {
-              _currentState = ScreenState.quiz;
-            });
-          });
-        }
-      });
-    });
+  String _currentTimeString(DateTime? start) {
+    if (start == null) return '0:00';
+    return _formatTime(DateTime.now().difference(start));
   }
 
-  void _togglePlayPause() {
-    setState(() {
-      _isPlaying = !_isPlaying;
-      _buddyState = _isPlaying ? BuddyState.reading : BuddyState.idle;
-      if (_isPlaying) {
-        _startNarration();
-      } else {
-        _narrationTimer?.cancel();
-      }
-    });
-  }
-
-  void _onQuizCorrect() {
-    setState(() {
-      _currentState = ScreenState.correct;
-      _buddyState = BuddyState.celebrating;
-    });
-  }
-
-  void _onQuizWrong() {
-    setState(() {
-      _currentState = ScreenState.wrong;
-      _buddyState = BuddyState.sad;
-    });
-  }
-
-  void _onRetryWrong() {
-    setState(() {
-      _currentState = ScreenState.quiz;
-      _buddyState = BuddyState.idle;
-    });
-  }
-
-  void _onContinueCorrect() {
-    setState(() {
-      _currentState = ScreenState.idle;
-      _buddyState = BuddyState.idle;
-      _currentSentenceIndex = 0;
-      _audioProgress = 0.0;
-      _isPlaying = false;
-    });
-  }
-
-  void _onErrorRetry() {
-    setState(() {
-      _currentState = ScreenState.idle;
-      _buddyState = BuddyState.idle;
-    });
-  }
-
-  void _simulateError() {
-    setState(() {
-      _currentState = ScreenState.error;
-      _buddyState = BuddyState.sad;
-    });
+  String _totalTimeString(DateTime? start, double progress) {
+    if (start == null || progress <= 0) return '0:00';
+    final elapsed = DateTime.now().difference(start);
+    final totalMs = (elapsed.inMilliseconds / progress).round();
+    return _formatTime(Duration(milliseconds: totalMs));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          SingleChildScrollView(
+    final storyAsync = ref.watch(storyListProvider);
+
+    return storyAsync.when(
+      loading: () => Scaffold(
+        body: Semantics(
+          label: 'Loading stories',
+          child: Center(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TopSection(buddyState: _buddyState),
-                const SizedBox(height: 8),
-                StoryCard(
-                  currentSentenceIndex: _currentSentenceIndex,
-                  isPlaying: _currentState == ScreenState.playing,
+                Image.asset(
+                  'lib/assets/peblo2.gif',
+                  width: 120,
+                  height: 120,
+                  cacheWidth: AppConstants.gifDecodeWidth,
+                  cacheHeight: AppConstants.gifDecodeHeight,
+                  filterQuality: FilterQuality.low,
                 ),
-                if (_currentState == ScreenState.playing) ...[
-                  const SizedBox(height: 4),
-                  AudioPlayerControls(
-                    isPlaying: _isPlaying,
-                    progress: _audioProgress,
-                    onPlayPause: _togglePlayPause,
-                    onPrevious: () {},
-                    onReplay: () {},
-                  ),
-                ],
-                const SizedBox(height: 8),
-                if (_currentState == ScreenState.idle) ...[
-                  PrimaryCTA(onPressed: _onReadStory),
-                ],
-                if (_currentState == ScreenState.quiz) ...[
-                  QuizSection(
-                    onCorrect: _onQuizCorrect,
-                    onWrong: _onQuizWrong,
-                  ),
-                ],
-                const SizedBox(height: 24),
-                if (_currentState == ScreenState.idle)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: TextButton.icon(
-                      onPressed: _simulateError,
-                      icon: const Icon(Icons.bug_report_rounded, size: 16),
-                      label: const Text('Simulate Error (dev)'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.textLight,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                const Text('Loading stories...'),
               ],
             ),
           ),
-          if (_currentState == ScreenState.loading)
-            const LoadingOverlay(),
-          if (_currentState == ScreenState.error)
-            ErrorOverlay(onRetry: _onErrorRetry),
-          if (_currentState == ScreenState.correct)
-            CelebrationOverlay(onContinue: _onContinueCorrect),
-          if (_currentState == ScreenState.wrong)
-            WrongAnswerOverlay(onRetry: _onRetryWrong),
-        ],
+        ),
       ),
+      error: (err, stack) => Scaffold(
+        body: Semantics(
+          label: 'Error loading stories',
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: AppColors.pinkSection),
+                const SizedBox(height: 16),
+                const Text('Failed to load stories.'),
+                const SizedBox(height: 12),
+                Semantics(
+                  label: 'Retry loading stories',
+                  button: true,
+                  child: TextButton(
+                    onPressed: () => ref.invalidate(storyListProvider),
+                    child: const Text('Retry'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      data: (stories) {
+        if (stories.isEmpty) {
+          return Scaffold(
+            body: Semantics(
+              label: 'No stories available',
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.info_outline, size: 48, color: AppColors.textLight),
+                    const SizedBox(height: 16),
+                    const Text('No stories available.'),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        final activeStory = stories.first;
+        final storyState = ref.watch(storyStateProvider);
+        final buddyState = ref.watch(buddyProvider);
+        final quizState = ref.watch(quizProvider);
+        final storyNotifier = ref.read(storyStateProvider.notifier);
+        final quizNotifier = ref.read(quizProvider.notifier);
+
+        final questions = activeStory.quiz?.questions ?? [];
+        final currentQuestion = quizState.currentQuestionIndex < questions.length
+            ? questions[quizState.currentQuestionIndex]
+            : null;
+
+        final isPlaying = storyState.status == StoryStatus.playing;
+        final isIdle = storyState.status == StoryStatus.idle;
+        final isLoading = storyState.status == StoryStatus.loading;
+        final isError = storyState.status == StoryStatus.error;
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      TopSection(buddyState: buddyState),
+                      const SizedBox(height: 8),
+                      StoryCard(
+                        title: activeStory.title,
+                        sentences: activeStory.sentences,
+                        currentSentenceIndex: storyState.currentSentenceIndex,
+                        isPlaying: isPlaying,
+                      ),
+                      if (isPlaying || storyState.status == StoryStatus.paused) ...[
+                        const SizedBox(height: 4),
+                        AudioPlayerControls(
+                          isPlaying: isPlaying,
+                          progress: storyState.progress,
+                          currentTime: _currentTimeString(storyState.narrationStartTime),
+                          totalDuration: _totalTimeString(storyState.narrationStartTime, storyState.progress),
+                          onPlayPause: () => storyNotifier.togglePlayPause(),
+                          onPrevious: () => storyNotifier.previous(),
+                          onReplay: () => storyNotifier.replay(),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      if (isIdle) ...[
+                        PrimaryCTA(onPressed: () => storyNotifier.readStory()),
+                      ],
+                      if (quizState.visibility == QuizVisibility.visible &&
+                          currentQuestion != null) ...[
+                        QuizSection(
+                          question: currentQuestion.question,
+                          options: currentQuestion.options,
+                          questionNumber: quizState.currentQuestionIndex + 1,
+                          totalQuestions: questions.length,
+                          onCorrect: () => quizNotifier.answerCorrect(),
+                          onWrong: () => quizNotifier.answerWrong(),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      if (isIdle)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Semantics(
+                            label: 'Simulate error for testing',
+                            button: true,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                ref.read(storyStateProvider.notifier).simulateError();
+                              },
+                              icon: const Icon(Icons.bug_report_rounded, size: 16),
+                              label: const Text('Simulate Error (dev)'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.textLight,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          ),
+                        ),
+                    const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              if (isLoading)
+                const LoadingOverlay(),
+              if (isError)
+                ErrorOverlay(
+                  onRetry: () {
+                    ref.read(storyStateProvider.notifier).readStory();
+                  },
+                ),
+              if (quizState.visibility == QuizVisibility.correct)
+                CelebrationOverlay(
+                  onContinue: () {
+                    quizNotifier.continueAfterCorrect();
+                    storyNotifier.reset();
+                  },
+                ),
+              if (quizState.visibility == QuizVisibility.wrong)
+                WrongAnswerOverlay(
+                  onRetry: () => quizNotifier.retryWrong(),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
